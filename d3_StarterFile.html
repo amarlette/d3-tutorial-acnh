@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+		<title>Animal Crossing Villagers by Species</title>
+		<script type="text/javascript" src="https://d3js.org/d3.v5.min.js"></script>
+
+		<style type="text/css">
+			.cooltip {
+                                border: solid;
+                                border-width: "2px";
+                                border-radius: "5px";
+                                padding: "5px";
+                        }	
+		</style>
+</head>
+<body>
+        <div id="dataviz"></div>
+	<script type="text/javascript">
+
+        dataset = {
+            "children": [{"Species":"Alligator","Count":7},
+                {"Species":"Anteater","Count":7},
+                {"Species":"Bear","Count":15},
+                {"Species":"Bird","Count":13},
+                {"Species":"Bull","Count":6},                
+                {"Species":"Cat","Count":23},
+                {"Species":"Chicken","Count":9},
+                {"Species":"Cow","Count":4},
+                {"Species":"Cub","Count":16},
+                {"Species":"Deer","Count":10},
+                {"Species":"Dog","Count":16},
+                {"Species":"Duck","Count":17},                
+                {"Species":"Eagle","Count":9},
+                {"Species":"Elephant","Count":11},
+                {"Species":"Frog","Count":18},
+                {"Species":"Goat","Count":8},
+                {"Species":"Gorilla","Count":9},
+                {"Species":"Hamster","Count":8},
+                {"Species":"Hippo","Count":7},
+                {"Species":"Horse","Count":15},
+                {"Species":"Kangaroo","Count":8},
+                {"Species":"Koala","Count":9},
+                {"Species":"Lion","Count":7},
+                {"Species":"Monkey","Count":8},
+                {"Species":"Mouse","Count":15},
+                {"Species":"Octopus","Count":3},
+                {"Species":"Ostrich","Count":10},
+                {"Species":"Penguin","Count":13},
+                {"Species":"Pig","Count":15},
+                {"Species":"Rabbit","Count":20},
+                {"Species":"Rhino","Count":6},
+                {"Species":"Sheep","Count":13},
+                {"Species":"Squirrel","Count":18},
+                {"Species":"Tiger","Count":7},
+                {"Species":"Wolf","Count":11}]
+        };
+
+        // Array of Colors ["#f1eff6","#e2e1ef","#cecee5","#b6b5d8","#9e9bc9","#8782bc","#7363ac","#61409b"] 
+        var diameter = 900;
+
+        dataset.children.sort(function(x, y){
+                return d3.ascending(x.Count, y.Count);
+        })
+
+        var color = d3.scaleQuantize()
+        .domain([0,23])
+        .range(["#f1eff6","#e2e1ef","#cecee5","#b6b5d8","#9e9bc9","#8782bc","#7363ac","#61409b"]);
+
+        var bubble = d3.pack(dataset).size([diameter, diameter]).padding(1.5);
+
+        var svg = d3.select("#dataviz").append("svg").attr("width", diameter).attr("height", diameter).attr("class", "bubble");
+
+        var nodes = d3.hierarchy(dataset).sum(function(d){return d.Count});
+        //creating the tooltip
+        var Tooltip = d3.select("#dataviz")
+        .append("Tooltip")
+        .style("opacity", 0)
+        .attr("class", "tooltip");
+        var mouseover = function(d) {
+                Tooltip.style("opacity", 1)
+                d3.select(this).style("stroke", "black").style("opacity", 1)
+        }
+
+        var mouseleave = function(d) {
+                Tooltip.style("opacity", 0)
+                d3.select(this).style("stroke", "none")
+        }
+
+        var node = svg.selectAll(".node")
+        .data(bubble(nodes).descendants())
+        .enter()
+        .filter(function(d){
+                return !d.children
+        })
+        .append("g")
+        .on("mouseover", mouseover)
+        .on("mouseleave", mouseleave)
+        .attr("class", "node")
+        .attr("transform", function(d) {
+                return "translate("+ d.x + "," + d.y + ")";
+        });
+
+        node.append("circle").attr("r", function(d) {
+                return d.r;
+        })
+        .style("fill", function(d,i) {
+                return color(i);
+        });
+
+        node.append("text")
+        .attr("dy", ".2em") 
+        .style("text-anchor", "middle")
+        //????
+        .text(function(d) {
+                return d.data.Species.substring(0, d.r/3);
+        })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", function(d){
+                return d.r/2.5;
+        })
+        .attr("fill", "black");
+
+        node.append("text")
+        .attr("dy", "1.4em")
+        .style("text-anchor", "middle")
+        //????
+        .text(function(d) {
+                return d.data.Count;
+        })
+        .attr("font-family", "sans-serif")
+        .attr("font-size", function(d){
+                return d.r/3;
+        })
+        .attr("fill", "black");
+
+        d3.select(self.frameElement).style("height", diameter+"px");
+
+	</script>
+</body>
+</html>
